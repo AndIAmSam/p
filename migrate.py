@@ -419,6 +419,10 @@ def process_and_collapse_receipts(df_cob):
         
     df_result = pd.DataFrame(collapsed)
     
+    # FIX: Convertir NaN/NaT a None para compatibilidad con MySQL (pymysql no acepta nan)
+    if not df_result.empty:
+        df_result = df_result.astype(object).where(pd.notna(df_result), None)
+        
     # Ordenar recibos numéricamente (R1, R2, ... R10, R11) en vez de alfabéticamente (R1, R10, R11, R12, R2...)
     if not df_result.empty and '#RECIBO' in df_result.columns:
         df_result['_recibo_num'] = df_result['#RECIBO'].str.extract(r'(\d+)').astype(float)
